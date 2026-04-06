@@ -1,26 +1,30 @@
 <?php
-session_start();
-include "config.php";
+session_start(); // Mulai session
+include "config.php"; // Koneksi database
 
 /* CEK LOGIN PETUGAS */
+// Mengecek apakah petugas sudah login, role benar, dan session valid
 if(
-   !isset($_SESSION['petugas_login']) ||
-   $_SESSION['petugas_login'] !== true ||
-   $_SESSION['petugas_role'] !== 'petugas'
+   !isset($_SESSION['petugas_login']) || // Jika belum login
+   $_SESSION['petugas_login'] !== true || // Jika login tidak valid
+   $_SESSION['petugas_role'] !== 'petugas' // Jika role bukan petugas
 ){
-    header("Location: login.php");
+    header("Location: login.php"); // Arahkan ke halaman login
     exit();
 }
 
 /* ============================
    AMBIL NAMA PETUGAS
    ============================ */
+// Ambil nama petugas dari session, jika kosong pakai "Petugas"
 $nama = $_SESSION['petugas_username'] ?? 'Petugas';
 
 /* ============================
    HITUNG DATA DI DATABASE
    ============================ */
+// Hitung total produk
 $produk    = mysqli_num_rows(mysqli_query($koneksi,"SELECT * FROM products"));
+// Hitung total transaksi
 $transaksi = mysqli_num_rows(mysqli_query($koneksi,"SELECT * FROM transaksi"));
 ?>
 <!DOCTYPE html>
@@ -32,8 +36,10 @@ $transaksi = mysqli_num_rows(mysqli_query($koneksi,"SELECT * FROM transaksi"));
 
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
 
+/* Background utama */
 body{background:#f2f4f7}
 
+/* Wrapper utama: sidebar + konten */
 .wrapper{display:flex;height:100vh}
 
 /* SIDEBAR */
@@ -46,6 +52,7 @@ body{background:#f2f4f7}
 
 .sidebar h2{text-align:center;margin-bottom:30px}
 
+/* Menu sidebar */
 .sidebar a{
  display:block;
  color:white;
@@ -54,19 +61,20 @@ body{background:#f2f4f7}
  border-radius:5px;
 }
 
+/* Hover dan menu aktif */
 .sidebar a:hover,
 .active{
  background:rgba(255,255,255,.2);
 }
 
-/* MAIN */
+/* MAIN CONTENT */
 .main{
  flex:1;
  padding:20px;
  background:white;
 }
 
-/* HEADER */
+/* HEADER ATAS */
 .header{
  background:#2196f3;
  color:white;
@@ -75,7 +83,7 @@ body{background:#f2f4f7}
  margin-bottom:20px;
 }
 
-/* BOX */
+/* BOX WRAPPER */
 .box{
  display:flex;
  gap:20px;
@@ -104,7 +112,7 @@ body{background:#f2f4f7}
  font-weight:bold;
 }
 
-/* ANIMASI */
+/* ANIMASI CARD */
 .card{
  transition:0.3s ease;
  animation: fadeUp 0.6s ease;
@@ -119,7 +127,7 @@ body{background:#f2f4f7}
  animation: pop 0.6s ease;
 }
 
-/* KEYFRAMES */
+/* KEYFRAMES ANIMASI */
 @keyframes fadeUp{
  from{
   opacity:0;
@@ -147,8 +155,9 @@ body{background:#f2f4f7}
 <!-- SIDEBAR -->
 <div class="sidebar">
 
-<h2>KOWI-MART</h2>
+<h2>KOWI-MART</h2> <!-- Judul sidebar -->
 
+<!-- Menu navigasi -->
 <a href="dashboard.php" class="active">Dashboard</a>
 <a href="transaksi.php">Transaksi</a>
 <a href="produk.php">Data Produk</a>
@@ -156,11 +165,11 @@ body{background:#f2f4f7}
 
 <br><br>
 
-<a href="logout.php">Keluar</a>
+<a href="logout.php">Keluar</a> <!-- Logout -->
 
 </div>
 
-<!-- MAIN -->
+<!-- MAIN CONTENT -->
 <div class="main">
 
 <div class="header">
@@ -173,11 +182,13 @@ body{background:#f2f4f7}
 
 <div class="box">
 
+    <!-- Card total produk -->
     <div class="card">
         <h3>Total Produk</h3>
         <p><?= $produk ?></p>
     </div>
 
+    <!-- Card total transaksi -->
     <div class="card">
         <h3>Total Transaksi</h3>
         <p><?= $transaksi ?></p>
