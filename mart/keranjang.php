@@ -2,21 +2,32 @@
 session_start();
 include "config.php";
 
-/* SIMPAN ASAL HALAMAN */
+/* ===========================================
+   MENYIMPAN HALAMAN ASAL
+   digunakan agar tombol "kembali" tahu harus
+   balik ke mana (keranjang.php)
+=========================================== */
 $_SESSION['back_to'] = 'keranjang.php';
 
+/* ===========================================
+   JIKA KERANJANG BELUM ADA, BUAT ARRAY EMPTY
+=========================================== */
 if(!isset($_SESSION['cart'])){
     $_SESSION['cart'] = [];
 }
 
 
-/* ADD */
+/* ===========================================
+   TAMBAH PRODUK KE KERANJANG (ADD)
+=========================================== */
 if(isset($_GET['add'])){
     $id = $_GET['add'];
 
+    // Jika sudah ada → tambah 1
     if(isset($_SESSION['cart'][$id])){
         $_SESSION['cart'][$id]++;
     }else{
+        // Jika belum ada → set qty = 1
         $_SESSION['cart'][$id] = 1;
     }
 
@@ -24,7 +35,9 @@ if(isset($_GET['add'])){
     exit();
 }
 
-/* PLUS */
+/* ===========================================
+   TOMBOL PLUS (TAMBAH QTY)
+=========================================== */
 if(isset($_GET['plus'])){
     $id = $_GET['plus'];
     $_SESSION['cart'][$id]++;
@@ -32,7 +45,11 @@ if(isset($_GET['plus'])){
     exit();
 }
 
-/* MINUS */
+/* ===========================================
+   TOMBOL MINUS (KURANGI QTY)
+   jika qty > 1 → kurangi
+   jika qty = 1 → hapus item
+=========================================== */
 if(isset($_GET['minus'])){
     $id = $_GET['minus'];
 
@@ -46,7 +63,9 @@ if(isset($_GET['minus'])){
     exit();
 }
 
-/* DELETE */
+/* ===========================================
+   HAPUS PRODUK DARI KERANJANG
+=========================================== */
 if(isset($_GET['delete'])){
     $id = $_GET['delete'];
     unset($_SESSION['cart'][$id]);
@@ -110,7 +129,7 @@ body{
     margin-right:20px;
 }
 
-/* INFO */
+/* INFO PRODUK */
 .info{
     flex:1;
 }
@@ -124,7 +143,7 @@ body{
     color:#555;
 }
 
-/* QTY */
+/* QTY BUTTON */
 .qty{
     display:flex;
     align-items:center;
@@ -140,7 +159,7 @@ body{
     color:black;
 }
 
-/* DELETE */
+/* DELETE BUTTON */
 .delete{
     background:red;
     color:white;
@@ -163,7 +182,7 @@ body{
     font-weight:bold;
 }
 
-/* CHECKOUT */
+/* CHECKOUT BUTTON */
 .checkout{
     background:#2196f3;
     color:white;
@@ -174,7 +193,7 @@ body{
     font-size:16px;
 }
 
-/* BACK */
+/* BACK BUTTON */
 .back{
     display:inline-block;
     margin-top:20px;
@@ -246,14 +265,25 @@ body{
 
 <script>
 
+/* ===========================================
+   MUNCULKAN POPUP PILIH METODE PEMBAYARAN
+=========================================== */
 function openPopup(){
     document.getElementById("popup").style.display = "flex";
 }
 
+/* ===========================================
+   TUTUP POPUP
+=========================================== */
 function closePopup(){
     document.getElementById("popup").style.display = "none";
 }
 
+/* ===========================================
+   PILIH METODE PEMBAYARAN
+   Transfer → configure_transfer.php
+   COD      → configure_cod.php
+=========================================== */
 function pilihMetode(metode){
 
     if(metode === "Transfer"){
@@ -285,6 +315,9 @@ KOWI-MART
 
 $total = 0;
 
+/* ===========================================
+   JIKA KERANJANG KOSONG
+=========================================== */
 if(empty($_SESSION['cart'])): ?>
 
 <div class="empty">
@@ -315,14 +348,18 @@ $total += $subtotal;
 
 <div class="qty">
 
+<!-- tombol minus -->
 <a href="?minus=<?= $id ?>">−</a>
 
+<!-- jumlah produk -->
 <span><?= $qty ?></span>
 
+<!-- tombol plus -->
 <a href="?plus=<?= $id ?>">+</a>
 
 </div>
 
+<!-- tombol hapus produk -->
 <a href="?delete=<?= $id ?>" class="delete">
 Hapus
 </a>
@@ -338,6 +375,7 @@ Hapus
 
 <span>Rp <?= number_format($total) ?></span>
 
+<!-- tombol checkout -->
 <button class="checkout" onclick="openPopup()">
 Checkout
 </button>
@@ -346,12 +384,13 @@ Checkout
 
 <?php endif; ?>
 
+<!-- tombol kembali -->
 <a href="pemesanan.php" class="back">←</a>
 
 </div>
 
 
-<!-- POPUP -->
+<!-- POPUP PEMBAYARAN -->
 <div class="popup" id="popup">
 
     <div class="popup-box">
@@ -360,11 +399,13 @@ Checkout
 
         <div class="popup-btn">
 
+            <!-- Transfer -->
             <button class="btn-transfer"
             onclick="pilihMetode('Transfer')">
                 Transfer
             </button>
 
+            <!-- COD -->
             <button class="btn-cod"
             onclick="pilihMetode('COD')">
                 COD
@@ -372,6 +413,7 @@ Checkout
 
         </div>
 
+        <!-- tombol batal -->
         <button class="btn-close" onclick="closePopup()">
             Batal
         </button>
