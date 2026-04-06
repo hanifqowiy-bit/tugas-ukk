@@ -1,25 +1,37 @@
 <?php
+// Menampilkan semua error (mode debugging)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 session_start();
 include "config.php";
 
+/* ====================================================
+   PROSES LOGIN
+   Jika tombol login ditekan, ambil username & password
+==================================================== */
 if (isset($_POST['login'])) {
 
     $username = $_POST['username'];
     $password = $_POST['password'];
 
+    // Ambil data user berdasarkan username
     $q = mysqli_query($koneksi, "SELECT * FROM users WHERE username='$username'");
     $data = mysqli_fetch_assoc($q);
 
+    /* ====================================================
+       CEK PASSWORD
+       password_verify → cocokkan password input dengan hash
+    ===================================================== */
     if ($data && password_verify($password, $data['password'])) {
 
+        // Jika login berhasil → buat session dan pindah ke dashboard
         $_SESSION['user_id'] = $data['id'];
         header("Location: dashboard.php");
         exit();
 
     } else {
+        // Jika username atau password salah
         $error = "Username atau password salah!";
     }
 }
@@ -31,6 +43,7 @@ if (isset($_POST['login'])) {
 <title>Login</title>
 
 <style>
+/* Styling tampilan login */
 *{
     box-sizing:border-box;
     font-family: Arial, sans-serif;
@@ -45,7 +58,7 @@ body{
     align-items:center;
 }
 
-/* CARD */
+/* CARD LOGIN */
 .box{
     width:400px;
     background:white;
@@ -54,19 +67,19 @@ body{
     box-shadow:0 8px 25px rgba(0,0,0,.25);
 }
 
-/* TITLE */
+/* JUDUL */
 .box h2{
     text-align:center;
     margin-bottom:25px;
 }
 
-/* LABEL */
+/* LABEL FORM */
 label{
     font-size:13px;
     color:#333;
 }
 
-/* INPUT */
+/* INPUT FORM */
 input{
     width:100%;
     padding:11px;
@@ -75,7 +88,7 @@ input{
     border:1px solid #ccc;
 }
 
-/* BUTTON */
+/* BUTTON LOGIN */
 button{
     width:100%;
     padding:12px;
@@ -91,7 +104,7 @@ button:hover{
     background:#1682bf;
 }
 
-/* TEXT */
+/* TEXT BAWAH */
 p{
     text-align:center;
     font-size:13px;
@@ -112,9 +125,13 @@ a{
 <h2>Login</h2>
 
 <?php if (!empty($error)) : ?>
+<!-- Tampilkan pesan error jika login gagal -->
 <p style="color:red;text-align:center"><?= $error ?></p>
 <?php endif; ?>
 
+<!-- ==========================
+     FORM LOGIN
+========================== -->
 <form method="POST">
 
     <label>Username</label>
