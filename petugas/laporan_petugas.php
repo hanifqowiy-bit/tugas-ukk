@@ -1,11 +1,13 @@
 <?php
-session_start();
-include "config.php";
+session_start(); // Memulai session untuk mengecek login
+
+include "config.php"; // Menghubungkan ke database
 
 /* ============================
    CEK LOGIN PETUGAS (YANG BARU)
    ============================ */
 if(!isset($_SESSION['petugas_login']) || $_SESSION['petugas_login'] !== true){
+    // Jika belum login sebagai petugas, kembalikan ke halaman login
     header("Location: login.php");
     exit();
 }
@@ -16,20 +18,25 @@ if(!isset($_SESSION['petugas_login']) || $_SESSION['petugas_login'] !== true){
 <head>
 <title>Laporan</title>
 
-<!-- ICON -->
+<!-- ICON: Font Awesome untuk ikon menu dan card -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
 
-/* RESET */
+/* RESET: Menghilangkan margin/padding default */
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
 
-/* LAYOUT */
+/* LAYOUT UMUM */
 body{background:#f2f4f7}
 
-.wrapper{display:flex;height:100vh}
+.wrapper{
+    display:flex;
+    height:100vh;
+}
 
-/* SIDEBAR */
+/* ======================
+   SIDEBAR NAVIGASI
+   ====================== */
 .sidebar{
  width:230px;
  background:#2196f3;
@@ -37,7 +44,10 @@ body{background:#f2f4f7}
  padding:20px;
 }
 
-.sidebar h2{text-align:center;margin-bottom:30px}
+.sidebar h2{
+    text-align:center;
+    margin-bottom:30px;
+}
 
 .sidebar a{
  display:block;
@@ -49,13 +59,19 @@ body{background:#f2f4f7}
 
 .sidebar a:hover,
 .active{
- background:rgba(255,255,255,.2);
+ background:rgba(255,255,255,.2); /* Efek hover */
 }
 
-/* MAIN */
-.main{flex:1;padding:20px;background:white}
+/* ======================
+   AREA UTAMA (MAIN)
+   ====================== */
+.main{
+    flex:1;
+    padding:20px;
+    background:white;
+}
 
-/* HEADER */
+/* HEADER DI MAIN */
 .header{
  background:#2196f3;
  color:white;
@@ -64,7 +80,9 @@ body{background:#f2f4f7}
  margin-bottom:20px;
 }
 
-/* CARD */
+/* ======================
+   CARD LAPORAN
+   ====================== */
 .cards{
  display:flex;
  gap:20px;
@@ -85,7 +103,7 @@ body{background:#f2f4f7}
 }
 
 .card:hover{
- transform:scale(1.05);
+ transform:scale(1.05); /* Animasi zoom saat hover */
 }
 
 .card h3{
@@ -99,7 +117,7 @@ body{background:#f2f4f7}
 }
 
 .card i{
- color:white;
+ color:white; /* Warna ikon */
 }
 
 </style>
@@ -109,11 +127,14 @@ body{background:#f2f4f7}
 
 <div class="wrapper">
 
-<!-- SIDEBAR -->
+<!-- ======================
+     SIDEBAR MENU KIRI
+     ====================== -->
 <div class="sidebar">
 
-<h2>KOWI-MART</h2>
+<h2>KOWI-MART</h2> <!-- Judul sidebar -->
 
+<!-- Menu navigasi petugas -->
 <a href="dashboard.php">Dashboard</a>
 <a href="transaksi.php">Transaksi</a>
 <a href="produk.php">Data Produk</a>
@@ -121,40 +142,42 @@ body{background:#f2f4f7}
 
 <br><br>
 
-<a href="logout.php">Keluar</a>
+<a href="logout.php">Keluar</a> <!-- Tombol logout -->
 
 </div>
 
-<!-- MAIN -->
+<!-- ======================
+     BAGIAN UTAMA KANAN
+     ====================== -->
 <div class="main">
 
 <div class="header">
-<h3>Laporan</h3>
+<h3>Laporan</h3> <!-- Judul halaman laporan -->
 </div>
 
 <div class="cards">
 
-<!-- PENJUALAN -->
+<!-- CARD PENJUALAN -->
 <a href="penjualan_petugas.php" class="card">
  <h3>Laporan Penjualan</h3>
  <div class="icon">
-  <i class="fas fa-chart-line"></i>
+  <i class="fas fa-chart-line"></i> <!-- Ikon grafik -->
  </div>
 </a>
 
-<!-- TRANSAKSI -->
+<!-- CARD TRANSAKSI -->
 <a href="transaksi_petugas.php" class="card">
  <h3>Laporan Transaksi</h3>
  <div class="icon">
-  <i class="fas fa-file-invoice"></i>
+  <i class="fas fa-file-invoice"></i> <!-- Ikon dokumen -->
  </div>
 </a>
 
-<!-- STOK -->
+<!-- CARD STOK -->
 <a href="stok_petugas.php" class="card">
  <h3>Laporan Stok</h3>
  <div class="icon">
-  <i class="fas fa-box"></i>
+  <i class="fas fa-box"></i> <!-- Ikon box/stok -->
  </div>
 </a>
 
