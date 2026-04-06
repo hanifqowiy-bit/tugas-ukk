@@ -5,14 +5,14 @@ include "../config.php";
 
 /* Proteksi Admin */
 if($_SESSION['role']!='admin'){
- header("Location: ../login.php");
- exit;
+    header("Location: ../login.php");
+    exit;
 }
 
 /* Folder Backup */
 $backup_dir = "../../backup/";
 if(!is_dir($backup_dir)){
- mkdir($backup_dir,0777,true);
+    mkdir($backup_dir,0777,true);
 }
 
 /* Database Config */
@@ -25,98 +25,112 @@ $db   = "kowi_mart";
 /* ================= BACKUP ================= */
 if(isset($_POST['backup'])){
 
- $date = date("Y-m-d_H-i-s");
- $filename = "backup_".$date.".sql";
- $filepath = $backup_dir.$filename;
+    $date = date("Y-m-d_H-i-s");
+    $filename = "backup_".$date.".sql";
+    $filepath = $backup_dir.$filename;
 
- $koneksi = mysqli_connect($host,$user,$pass,$db);
+    $koneksi = mysqli_connect($host,$user,$pass,$db);
 
- $sql = "-- DATABASE BACKUP $db \n";
- $sql .= "-- ".date("Y-m-d H:i:s")."\n\n";
+    $sql = "-- DATABASE BACKUP $db \n";
+    $sql .= "-- ".date("Y-m-d H:i:s")."\n\n";
 
- $tables = [];
+    $tables = [];
 
- /* Ambil semua tabel */
- $q = mysqli_query($koneksi,"SHOW TABLES");
+    /* Ambil semua tabel */
+    $q = mysqli_query($koneksi,"SHOW TABLES");
 
- while($row = mysqli_fetch_row($q)){
-  $tables[] = $row[0];
- }
-
- foreach($tables as $table){
-
-  /* Struktur Tabel */
-  $q2 = mysqli_query($koneksi,"SHOW CREATE TABLE `$table`");
-  $row2 = mysqli_fetch_row($q2);
-
-  $sql .= "\nDROP TABLE IF EXISTS `$table`;\n";
-  $sql .= $row2[1].";\n\n";
-
-  /* Data Tabel */
-  $q3 = mysqli_query($koneksi,"SELECT * FROM `$table`");
-
-  while($row3 = mysqli_fetch_assoc($q3)){
-
-   $sql .= "INSERT INTO `$table` VALUES(";
-
-   $data = [];
-
-   foreach($row3 as $val){
-
-    if($val===NULL){
-     $data[]="NULL";
-    }else{
-     $data[]="'".mysqli_real_escape_string($koneksi,$val)."'";
+    while($row = mysqli_fetch_row($q)){
+        $tables[] = $row[0];
     }
 
-   }
+    foreach($tables as $table){
 
-   $sql .= implode(",",$data).");\n";
+        /* Struktur Tabel */
+        $q2 = mysqli_query($koneksi,"SHOW CREATE TABLE `$table`");
+        $row2 = mysqli_fetch_row($q2);
 
-  }
+        $sql .= "\nDROP TABLE IF EXISTS `$table`;\n";
+        $sql .= $row2[1].";\n\n";
 
-  $sql.="\n\n";
- }
+        /* Data Tabel */
+        $q3 = mysqli_query($koneksi,"SELECT * FROM `$table`");
 
- /* Simpan ke file */
- file_put_contents($filepath,$sql);
+        while($row3 = mysqli_fetch_assoc($q3)){
 
- header("Location: backup_restore.php?status=backup_success");
- exit;
+            $sql .= "INSERT INTO `$table` VALUES(";
+
+            $data = [];
+
+            foreach($row3 as $val){
+
+                if($val===NULL){
+                    $data[]="NULL";
+                }else{
+                    $data[]="'".mysqli_real_escape_string($koneksi,$val)."'";
+                }
+
+            }
+
+            $sql .= implode(",",$data).");\n";
+
+        }
+
+        $sql.="\n\n";
+    }
+
+    /* Simpan ke file */
+    file_put_contents($filepath,$sql);
+
+    header("Location: backup_restore.php?status=backup_success");
+    exit;
 }
 
 
-/* ================= RESTORE ================= */
+
+/* ================= RESTORE (FIX FINAL + FOREIGN KEY) ================= */
 if(isset($_POST['restore'])){
 
- if(!empty($_FILES['restore_file']['name'])){
+    if(!empty($_FILES['restore_file']['name'])){
 
-  $tmp = $_FILES['restore_file']['tmp_name'];
+        $tmp = $_FILES['restore_file']['tmp_name'];
+        $sql = file_get_contents($tmp);
 
-  $sql = file_get_contents($tmp);
+        $koneksi = mysqli_connect($host,$user,$pass,$db);
 
-  $koneksi = mysqli_connect($host,$user,$pass,$db);
+        /* Matikan FK */
+        mysqli_query($koneksi, "SET FOREIGN_KEY_CHECKS = 0;");
 
-  mysqli_multi_query($koneksi,$sql);
+        /* Pecah query */
+        $queries = explode(";\n", $sql);
 
-  header("Location: backup_restore.php?status=restore_success");
-  exit;
- }
+        foreach($queries as $query){
+            $query = trim($query);
+            if($query){
+                mysqli_query($koneksi, $query);
+            }
+        }
 
+        /* Hidupkan FK */
+        mysqli_query($koneksi, "SET FOREIGN_KEY_CHECKS = 1;");
+
+        header("Location: backup_restore.php?status=restore_success");
+        exit;
+    }
 }
+
 
 
 /* ================= DELETE ================= */
 if(isset($_GET['delete'])){
 
- $file = $backup_dir.$_GET['delete'];
+    $file = $backup_dir.$_GET['delete'];
 
- if(file_exists($file)){
-  unlink($file);
- }
+    if(file_exists($file)){
+        unlink($file);
+    }
 
- header("Location: backup_restore.php");
- exit;
+    header("Location: backup_restore.php");
+    exit;
 }
 
 
@@ -255,7 +269,6 @@ th{
  if($_GET['status']=='backup_success'){
   echo "Backup berhasil dibuat.";
  }
-
  if($_GET['status']=='restore_success'){
   echo "Restore database berhasil.";
  }
@@ -268,11 +281,9 @@ th{
 
 <!-- BACKUP -->
 <form method="post">
-
 <button type="submit" name="backup" class="btn btn-primary">
  Backup Sekarang
 </button>
-
 </form>
 
 
@@ -293,12 +304,11 @@ foreach($files as $file){
 
  $bytes = filesize($backup_dir.$file);
 
-if($bytes < 1024*1024){
-   $size = round($bytes/1024,2)." KB";
-}else{
-   $size = round($bytes/1024/1024,2)." MB";
-}
-
+ if($bytes < 1024*1024){
+    $size = round($bytes/1024,2)." KB";
+ }else{
+    $size = round($bytes/1024/1024,2)." MB";
+ }
 ?>
 
 <tr>
