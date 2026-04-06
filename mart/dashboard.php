@@ -1,18 +1,19 @@
 <?php
-// Memulai session
 session_start();
-
-// Menghubungkan ke database
 include "config.php";
 
-// Mengecek apakah user sudah login
 if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php"); // Jika belum login, kembali ke halaman login
+    header("Location: index.php");
     exit();
 }
 
-// Mengambil semua data produk dari database
-$produk = mysqli_query($koneksi, "SELECT * FROM products");
+// LOGIKA SEARCH
+if (isset($_GET['cari']) && $_GET['cari'] != "") {
+    $cari = mysqli_real_escape_string($koneksi, $_GET['cari']);
+    $produk = mysqli_query($koneksi, "SELECT * FROM products WHERE name LIKE '%$cari%' ");
+} else {
+    $produk = mysqli_query($koneksi, "SELECT * FROM products");
+}
 ?>
 
 <!DOCTYPE html>
@@ -20,12 +21,9 @@ $produk = mysqli_query($koneksi, "SELECT * FROM products");
 <head>
 <title>Dashboard</title>
 
-<!-- CDN Lucide Icons -->
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <style>
-
-/* Reset CSS dasar */
 *{
     margin:0;
     padding:0;
@@ -33,13 +31,12 @@ $produk = mysqli_query($koneksi, "SELECT * FROM products");
     font-family: Arial, sans-serif;
 }
 
-/* Layout utama */
 body{
     display:flex;
     background:#f4f6f9;
 }
 
-/* ===== SIDEBAR ===== */
+/* SIDEBAR */
 .sidebar{
     width:220px;
     background:#169bd5;
@@ -48,13 +45,11 @@ body{
     color:white;
 }
 
-/* Judul sidebar */
 .sidebar h2{
     text-align:center;
     margin-bottom:30px;
 }
 
-/* Link menu sidebar */
 .sidebar a{
     display:flex;
     align-items:center;
@@ -67,13 +62,12 @@ body{
     transition:0.2s;
 }
 
-/* Hover dan menu aktif */
 .sidebar a:hover,
 .sidebar .active{
     background:rgba(255,255,255,0.2);
 }
 
-/* ===== CONTENT ===== */
+/* CONTENT */
 .content{
     flex:1;
     padding:25px;
@@ -110,7 +104,46 @@ body{
     text-decoration:none;
 }
 
-/* ===== JUDUL PRODUK ===== */
+/* SEARCH AREA */
+.search-area{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+/* BACK BUTTON */
+.back-btn{
+    padding:11px 15px;
+    background:#169bd5;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    display:none; /* Default HIDDEN */
+    align-items:center;
+    gap:5px;
+    font-size:14px;
+    text-decoration:none;
+}
+.back-btn:hover{
+    background:#0f80b4;
+}
+
+/* SEARCH BOX */
+.search-box{
+    flex:1;
+}
+
+.search-box input{
+    width:100%;
+    padding:12px;
+    border-radius:8px;
+    border:1px solid #bbb;
+    font-size:14px;
+}
+
+/* JUDUL PRODUK */
 .judul-produk{
     font-size:20px;
     margin-bottom:15px;
@@ -119,7 +152,7 @@ body{
     padding-left:10px;
 }
 
-/* ===== PRODUK GRID ===== */
+/* PRODUK GRID */
 .produk{
     display:grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -136,13 +169,11 @@ body{
     transition:all 0.3s ease;
 }
 
-/* Efek hover card */
 .card:hover{
     transform:translateY(-6px);
     box-shadow:0 8px 20px rgba(0,0,0,0.15);
 }
 
-/* Gambar produk */
 .card img{
     width:100%;
     height:200px;
@@ -150,83 +181,81 @@ body{
     border-radius:10px;
 }
 
-/* Nama produk */
 .card h3{
     font-size:15px;
     margin:10px 0 5px;
 }
 
-/* Harga produk */
 .card p{
     color:#169bd5;
     font-weight:bold;
     font-size:15px;
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- ===== SIDEBAR ===== -->
 <div class="sidebar">
     <h2>KOWI-MART</h2>
 
-    <!-- Menu Home -->
     <a href="dashboard.php" class="active">
         <i data-lucide="home"></i> Home
     </a>
 
-    <!-- Menu Pemesanan -->
     <a href="pemesanan.php">
         <i data-lucide="shopping-cart"></i> Pemesanan
     </a>
 
-    <!-- Menu Logout -->
     <a href="logout.php">
         <i data-lucide="log-out"></i> Keluar
     </a>
 </div>
 
-<!-- ===== CONTENT ===== -->
 <div class="content">
 
-    <!-- HEADER -->
     <div class="header">
         <div>
-            <!-- Judul Dashboard -->
             <h2>Selamat Datang di KOWI-MART 
                 <i data-lucide="shopping-bag"></i>
             </h2>
-
-            <!-- Subjudul -->
             <p>Belanja mudah, cepat, dan terpercaya.</p>
         </div>
 
-        <!-- Icon Profile -->
         <a href="profile.php" class="profile">
             <i data-lucide="user"></i>
         </a>
     </div>
 
-    <!-- ===== JUDUL PRODUK ===== -->
+    <!-- SEARCH + BACK BUTTON -->
+    <div class="search-area">
+        
+        <!-- BACK (muncul saat ada pencarian) -->
+        <a id="backBtn" href="dashboard.php" class="back-btn">
+            <i data-lucide="arrow-left"></i> Kembali
+        </a>
+
+        <!-- SEARCH BAR -->
+        <form method="GET" class="search-box">
+            <input 
+                type="text" 
+                id="searchInput"
+                name="cari" 
+                placeholder="Cari produk..." 
+                value="<?= isset($_GET['cari']) ? $_GET['cari'] : '' ?>">
+        </form>
+    </div>
+
     <div class="judul-produk">
         Produk
     </div>
 
-    <!-- ===== LIST PRODUK ===== -->
     <div class="produk">
 
         <?php while($p = mysqli_fetch_assoc($produk)): ?>
-        <!-- Card produk -->
         <div class="card">
-            <!-- Menampilkan gambar produk dari folder assets -->
             <img src="../assets/<?php echo $p['photo']; ?>">
-
-            <!-- Menampilkan nama produk -->
             <h3><?php echo $p['name']; ?></h3>
-
-            <!-- Menampilkan harga dengan format rupiah -->
             <p>Rp <?php echo number_format($p['price']); ?></p>
         </div>
         <?php endwhile; ?>
@@ -235,9 +264,18 @@ body{
 
 </div>
 
-<!-- Mengaktifkan Lucide Icons -->
 <script>
     lucide.createIcons();
+
+    // Show/hide tombol back otomatis
+    const backBtn = document.getElementById("backBtn");
+    const searchInput = document.getElementById("searchInput");
+
+    if (searchInput.value.trim() !== "") {
+        backBtn.style.display = "flex";
+    } else {
+        backBtn.style.display = "none";
+    }
 </script>
 
 </body>
