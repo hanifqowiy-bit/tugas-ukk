@@ -10,7 +10,22 @@ include "config.php";
 // Mengambil ID user dari session login
 $user_id = $_SESSION['user_id'];
 
-// Mengambil data user berdasarkan ID
+// ===============================
+// UPDATE DATA PROFIL
+// ===============================
+if(isset($_POST['update'])){
+    $username = $_POST['username'];
+    $email    = $_POST['email'];
+    $alamat   = $_POST['alamat'];
+
+    mysqli_query($koneksi, "UPDATE users SET 
+        username='$username',
+        email='$email',
+        alamat='$alamat'
+    WHERE id='$user_id'");
+}
+
+// Mengambil data user terbaru
 $q = mysqli_query($koneksi,"SELECT * FROM users WHERE id='$user_id'");
 $data = mysqli_fetch_assoc($q);
 ?>
@@ -93,7 +108,6 @@ body{
     border-bottom:1px solid #ddd;
 }
 
-/* Lingkaran avatar */
 .avatar{
     width:70px;
     height:70px;
@@ -104,7 +118,6 @@ body{
     align-items:center;
 }
 
-/* Teks username */
 .user-text{
     font-size:14px;
 }
@@ -122,7 +135,7 @@ label{
     margin-bottom:5px;
 }
 
-input{
+input, textarea{
     width:100%;
     padding:9px;
     border:1px solid #999;
@@ -131,8 +144,31 @@ input{
     transition:0.3s;
 }
 
-input:hover{
+input:hover, textarea:hover{
     border-color:#1e9bd7;
+}
+
+textarea{
+    resize:none;
+    height:80px;
+}
+
+/* ===============================
+   TOMBOL SIMPAN
+================================ */
+.btn-save{
+    width:100%;
+    padding:10px;
+    background:#1e9bd7;
+    color:white;
+    border:none;
+    border-radius:8px;
+    margin-top:10px;
+    cursor:pointer;
+    font-size:15px;
+}
+.btn-save:hover{
+    background:#0c6fa1;
 }
 
 /* ===============================
@@ -153,7 +189,6 @@ input:hover{
     color:#0c6fa1;
 }
 
-/* Konten kanan kosong sesuai desain */
 .content{
     flex:1;
 }
@@ -178,32 +213,43 @@ input:hover{
         <!-- Avatar dan Username -->
         <div class="avatar-box">
 
-            <!-- Icon User (Lucide menggantikan emoji 👤) -->
+            <!-- Icon User -->
             <div class="avatar">
                 <i data-lucide="user"></i>
             </div>
 
             <div class="user-text">
-                <!-- Menampilkan username dari database -->
                 <b><?php echo $data['username']; ?></b><br>
                 User
             </div>
 
         </div>
 
-        <!-- Informasi Username -->
-        <div class="form-group">
-            <label>Username</label>
-            <input type="text" value="<?php echo $data['username']; ?>" readonly>
-        </div>
+        <!-- ===============================
+             FORM EDIT PROFILE
+        ================================= -->
+        <form method="POST">
 
-        <!-- Informasi Email -->
-        <div class="form-group">
-            <label>Email</label>
-            <input type="text" value="<?php echo $data['email']; ?>" readonly>
-        </div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" value="<?php echo $data['username']; ?>">
+            </div>
 
-        <!-- Tombol kembali ke dashboard (menggantikan ← emoji) -->
+            <div class="form-group">
+                <label>Email</label>
+                <input type="text" name="email" value="<?php echo $data['email']; ?>">
+            </div>
+
+            <div class="form-group">
+                <label>Alamat</label>
+                <textarea name="alamat"><?php echo $data['alamat']; ?></textarea>
+            </div>
+
+            <button type="submit" name="update" class="btn-save">Simpan Perubahan</button>
+
+        </form>
+
+        <!-- Tombol kembali ke dashboard -->
         <a href="dashboard.php" class="back">
             <i data-lucide="arrow-left"></i>
         </a>
