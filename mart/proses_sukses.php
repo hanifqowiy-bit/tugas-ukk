@@ -1,6 +1,7 @@
 <?php
-session_start();
+session_start(); // Mulai sesi untuk cek login
 
+// Jika user belum login, arahkan ke halaman login
 if(!isset($_SESSION['user_id'])){
     header("Location: index.php");
     exit();
@@ -13,6 +14,7 @@ if(!isset($_SESSION['user_id'])){
 <title>Pesanan Diproses</title>
 
 <style>
+/* Mengatur tampilan dasar halaman */
 body{
     margin:0;
     font-family:Arial;
@@ -23,6 +25,7 @@ body{
     height:100vh;
 }
 
+/* Kotak konten utama */
 .box{
     background:white;
     padding:30px 40px;
@@ -31,12 +34,14 @@ body{
     box-shadow:0 0 10px rgba(0,0,0,0.2);
 }
 
+/* Icon centang hijau */
 .check{
     font-size:60px;
     color:green;
     margin-bottom:15px;
 }
 
+/* Tombol kembali ke dashboard */
 .btn{
     display:inline-block;
     margin-top:20px;
@@ -52,12 +57,13 @@ body{
 
 <body>
 
-<div class="box">
+<div class="box"> <!-- Container utama -->
 
-<div class="check">✔</div>
+<div class="check">✔</div> <!-- Icon centang -->
 
-<h2>Barang akan diproses</h2>
+<h2>Barang akan diproses</h2> <!-- Pesan status -->
 
+<!-- Tombol untuk kembali ke dashboard -->
 <a href="dashboard.php" class="btn">
 Kembali ke Dashboard
 </a>
