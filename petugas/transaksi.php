@@ -170,7 +170,7 @@ while($t = mysqli_fetch_assoc($q)){
 <!-- Tombol menuju halaman konfirmasi -->
 <td>
    <a href="konfirmasi_detail.php?id=<?= $t['id'] ?>" class="btn">
-      Konfirmasi
+      Edit
    </a>
 </td>
 
