@@ -1,14 +1,17 @@
 <?php
-session_start();
-include "config.php";
+session_start(); // Mulai session
 
+include "config.php"; // Koneksi database
+
+// Cek apakah user sudah login
 if(!isset($_SESSION['user_id'])){
-    header("Location:index.php");
+    header("Location:index.php"); // Jika belum login, kembali ke login
     exit();
 }
 
-$user_id = $_SESSION['user_id'];
+$user_id = $_SESSION['user_id']; // Ambil ID user dari session
 
+// Ambil semua transaksi milik user berdasarkan ID user
 $data = mysqli_query($koneksi,"
 SELECT * FROM transaksi
 WHERE user_id='$user_id'
@@ -23,13 +26,14 @@ ORDER BY id DESC
 
 <style>
 
+/* Styling halaman utama */
 body{
     margin:0;
     font-family:Arial;
     background:#f2f6f9;
 }
 
-/* HEADER */
+/* Header biru atas */
 .header{
     background:#1e9bd7;
     color:white;
@@ -39,7 +43,7 @@ body{
     font-weight:bold;
 }
 
-/* CONTAINER */
+/* Container box putih */
 .container{
     width:80%;
     margin:40px auto;
@@ -49,7 +53,7 @@ body{
     box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
-/* TABLE */
+/* Tabel */
 table{
     width:100%;
     border-collapse:collapse;
@@ -67,7 +71,7 @@ td{
     text-align:center;
 }
 
-/* BACK */
+/* Tombol kembali */
 .back{
     display:inline-block;
     margin-top:20px;
@@ -80,6 +84,7 @@ td{
     color:#157db3;
 }
 
+/* Jika kosong */
 .empty{
     text-align:center;
     padding:20px;
@@ -92,7 +97,7 @@ td{
 <body>
 
 <div class="header">
-KOWI-MART
+KOWI-MART <!-- Judul header -->
 </div>
 
 <div class="container">
@@ -109,9 +114,11 @@ KOWI-MART
     <th>Jumlah</th>
 </tr>
 
-<?php if(mysqli_num_rows($data) > 0): ?>
+<?php if(mysqli_num_rows($data) > 0): ?> 
+<!-- Jika transaksi ada -->
 
-<?php while($t = mysqli_fetch_assoc($data)): ?>
+<?php while($t = mysqli_fetch_assoc($data)): ?> 
+<!-- Loop setiap transaksi -->
 
 <tr>
     <td><?php echo $t['nama_produk']; ?></td>
@@ -121,7 +128,8 @@ KOWI-MART
 
 <?php endwhile; ?>
 
-<?php else: ?>
+<?php else: ?> 
+<!-- Jika tidak ada transaksi -->
 
 <tr>
     <td colspan="3" class="empty">
@@ -134,6 +142,7 @@ KOWI-MART
 </table>
 
 <a href="pemesanan.php" class="back">← Kembali</a>
+<!-- Tombol kembali -->
 
 </div>
 
