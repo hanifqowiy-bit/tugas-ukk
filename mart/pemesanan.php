@@ -19,8 +19,17 @@ if(!isset($_SESSION['user_id'])){
     exit();
 }
 
-// Mengambil semua data produk dari database
-$produk = mysqli_query($koneksi,"SELECT * FROM products");
+// ===============================
+// LOGIKA SEARCH
+// ===============================
+
+if (isset($_GET['cari']) && $_GET['cari'] != "") {
+    $cari = mysqli_real_escape_string($koneksi, $_GET['cari']);
+    $produk = mysqli_query($koneksi, "SELECT * FROM products WHERE name LIKE '%$cari%' ");
+} else {
+    $produk = mysqli_query($koneksi,"SELECT * FROM products");
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -32,9 +41,6 @@ $produk = mysqli_query($koneksi,"SELECT * FROM products");
 
 <style>
 
-/* ===============================
-   RESET CSS DASAR
-================================ */
 *{
     margin:0;
     padding:0;
@@ -46,18 +52,14 @@ body{
     background:#f2f6f9;
 }
 
-/* ===============================
-   CONTAINER UTAMA
-================================ */
+/* container */
 .container{
     display:flex;
     min-height:100vh;
     width:100%;
 }
 
-/* ===============================
-   SIDEBAR
-================================ */
+/* SIDEBAR */
 .sidebar{
     width:220px;
     background:#1e9bd7;
@@ -73,7 +75,6 @@ body{
     margin-bottom:30px;
 }
 
-/* Menu sidebar */
 .sidebar a{
     display:flex;
     align-items:center;
@@ -90,9 +91,7 @@ body{
     background:rgba(255,255,255,0.2);
 }
 
-/* ===============================
-   CONTENT
-================================ */
+/* CONTENT */
 .content{
     flex:1;
     padding:25px;
@@ -110,7 +109,6 @@ body{
     font-size:32px;
 }
 
-/* Tombol kanan header */
 .header-right a{
     display:inline-flex;
     align-items:center;
@@ -128,22 +126,56 @@ body{
     background:#157db3;
 }
 
-/* ===============================
-   PRODUK
-================================ */
 .title{
     font-size:20px;
     margin-bottom:15px;
 }
 
-/* Grid produk */
+/* ===============================
+   SEARCH AREA
+================================ */
+.search-area{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+}
+
+.back-btn{
+    padding:10px 15px;
+    background:#1e9bd7;
+    border-radius:8px;
+    color:white;
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:14px;
+}
+
+.back-btn:hover{
+    background:#157db3;
+}
+
+.search-box{
+    flex:1;
+}
+
+.search-box input{
+    width:100%;
+    padding:12px;
+    border-radius:8px;
+    border:1px solid #aaa;
+    font-size:14px;
+}
+
+/* PRODUK GRID */
 .produk-list{
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
     gap:20px;
 }
 
-/* Card produk */
 .card{
     background:white;
     border-radius:12px;
@@ -156,14 +188,12 @@ body{
     transform:translateY(-5px);
 }
 
-/* Gambar produk */
 .card img{
     width:100%;
     height:180px;
     object-fit:cover;
 }
 
-/* Isi card */
 .card-body{
     padding:12px;
     text-align:center;
@@ -174,16 +204,12 @@ body{
     margin-bottom:5px;
 }
 
-/* Harga */
 .price{
     color:#1e9bd7;
     font-weight:bold;
     margin-bottom:10px;
 }
 
-/* ===============================
-   BUTTON
-================================ */
 .btn-group{
     display:flex;
     justify-content:space-between;
@@ -213,9 +239,7 @@ body{
     background:#157db3;
 }
 
-/* ===============================
-   POPUP
-================================ */
+/* POPUP */
 .popup{
     position:fixed;
     top:0;
@@ -275,27 +299,17 @@ body{
 </style>
 
 <script>
-
-// Menyimpan ID produk sementara saat tombol beli ditekan
 let idProduk = "";
 
-/* 
-   Membuka popup pembayaran
-   dan menyimpan id produk
-*/
 function openPopup(id){
     idProduk = id;
     document.getElementById("popup").style.display = "flex";
 }
 
-/* Menutup popup */
 function closePopup(){
     document.getElementById("popup").style.display = "none";
 }
 
-/* 
-   Mengarahkan user ke halaman sesuai metode pembayaran
-*/
 function pilihMetode(metode){
 
     if(metode === "Transfer"){
@@ -306,7 +320,6 @@ function pilihMetode(metode){
     }
 
 }
-
 </script>
 
 </head>
@@ -314,33 +327,25 @@ function pilihMetode(metode){
 
 <div class="container">
 
-<!-- ===============================
-     SIDEBAR
-================================ -->
+<!-- SIDEBAR -->
 <div class="sidebar">
 
     <h2>KOWI-MART</h2>
 
-    <!-- Menu Home -->
     <a href="dashboard.php">
         <i data-lucide="home"></i> Home
     </a>
 
-    <!-- Menu Pemesanan -->
     <a href="pemesanan.php" class="active">
         <i data-lucide="shopping-cart"></i> Pemesanan
     </a>
 
-    <!-- Menu Logout -->
     <a href="logout.php">
         <i data-lucide="log-out"></i> Keluar
     </a>
 
 </div>
 
-<!-- ===============================
-     CONTENT
-================================ -->
 <div class="content">
 
 <div class="header">
@@ -351,18 +356,34 @@ function pilihMetode(metode){
     </div>
 
     <div class="header-right">
-
-        <!-- Tombol Keranjang -->
         <a href="keranjang.php">
             <i data-lucide="shopping-cart"></i> Keranjang
         </a>
 
-        <!-- Tombol Riwayat -->
         <a href="riwayat.php">
             <i data-lucide="history"></i> Riwayat
         </a>
-
     </div>
+
+</div>
+
+<!-- =============== SEARCH AREA =============== -->
+<div class="search-area">
+
+    <!-- Tombol back hanya muncul saat ada pencarian -->
+    <?php if(isset($_GET['cari']) && $_GET['cari'] != ""){ ?>
+        <a href="pemesanan.php" class="back-btn">
+            <i data-lucide="arrow-left"></i> Kembali
+        </a>
+    <?php } ?>
+
+    <form method="GET" class="search-box">
+        <input 
+            type="text" 
+            name="cari" 
+            placeholder="Cari produk..." 
+            value="<?php echo isset($_GET['cari']) ? $_GET['cari'] : '' ?>">
+    </form>
 
 </div>
 
@@ -376,29 +397,24 @@ function pilihMetode(metode){
 
 <div class="card">
 
-    <!-- Menampilkan gambar produk -->
     <img src="../assets/<?php echo $p['photo']; ?>">
 
     <div class="card-body">
 
-        <!-- Nama produk -->
         <h3><?php echo $p['name']; ?></h3>
 
-        <!-- Harga produk -->
         <div class="price">
             Rp <?php echo number_format($p['price']); ?>
         </div>
 
         <div class="btn-group">
 
-            <!-- Tombol tambah ke keranjang -->
             <a href="keranjang.php?add=<?php echo $p['id']; ?>">
                 <button class="btn-cart">
                     <i data-lucide="shopping-cart"></i>
                 </button>
             </a>
 
-            <!-- Tombol beli langsung -->
             <button class="btn-buy"
             onclick="openPopup('<?php echo $p['id']; ?>')">
                 Beli
@@ -418,9 +434,7 @@ function pilihMetode(metode){
 
 </div>
 
-<!-- ===============================
-     POPUP PEMBAYARAN
-================================ -->
+<!-- POPUP PEMBAYARAN -->
 <div class="popup" id="popup">
 
     <div class="popup-box">
@@ -429,13 +443,11 @@ function pilihMetode(metode){
 
         <div class="popup-btn">
 
-            <!-- Transfer -->
             <button class="btn-transfer"
             onclick="pilihMetode('Transfer')">
                 Transfer
             </button>
 
-            <!-- COD -->
             <button class="btn-cod"
             onclick="pilihMetode('COD')">
                 COD
@@ -443,7 +455,6 @@ function pilihMetode(metode){
 
         </div>
 
-        <!-- Tombol batal -->
         <button class="btn-close" onclick="closePopup()">
             Batal
         </button>
@@ -452,7 +463,6 @@ function pilihMetode(metode){
 
 </div>
 
-<!-- Mengaktifkan Lucide Icons -->
 <script>
     lucide.createIcons();
 </script>
