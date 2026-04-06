@@ -2,6 +2,10 @@
 session_start();
 include "config.php";
 
+/* ====================================================
+   CEK APAKAH USER SUDAH LOGIN
+   Jika belum login → redirect ke index.php
+==================================================== */
 if(!isset($_SESSION['user_id'])){
     header("Location:index.php");
     exit();
@@ -9,25 +13,38 @@ if(!isset($_SESSION['user_id'])){
 
 $mode = "";
 
-/* SINGLE */
+/* ====================================================
+   MODE SINGLE PRODUCT
+   Jika URL mengandung ?id=xx → beli 1 produk langsung
+==================================================== */
 if(isset($_GET['id'])){
     $mode = "single";
 
     $id = $_GET['id'];
+
+    // Ambil data produk berdasarkan ID
     $q = mysqli_query($koneksi,"SELECT * FROM products WHERE id='$id'");
     $produk = mysqli_fetch_assoc($q);
 
+    // Jika produk tidak ditemukan → kembali ke pemesanan
     if(!$produk){
         header("Location:pemesanan.php");
         exit();
     }
 }
 
-/* CART */
+/* ====================================================
+   MODE CART (KERANJANG)
+   Jika session cart tidak kosong → checkout keranjang
+==================================================== */
 elseif(!empty($_SESSION['cart'])){
     $mode = "cart";
 }
 
+/* ====================================================
+   JIKA BUKAN SINGLE DAN BUKAN CART
+   Artinya user belum memilih produk → redirect kembali
+==================================================== */
 else{
     header("Location:pemesanan.php");
     exit();
@@ -39,6 +56,7 @@ else{
 <title>Transfer</title>
 
 <style>
+/* Styling halaman checkout transfer */
 body{
     font-family:Arial;
     background:#f2f6f9;
@@ -110,21 +128,31 @@ body{
 
 <?php if($mode=="single"): ?>
 
+    <!-- ============================
+         MODE SINGLE
+         Menampilkan 1 produk saja
+    ============================= -->
     <p><?= $produk['name'] ?></p>
     <p>Rp <?= number_format($produk['price']) ?></p>
 
 <?php else: ?>
 
 <?php
+// ============================
+// MODE CART
+// Loop semua item di keranjang
+// ============================
 $total=0;
 
 foreach($_SESSION['cart'] as $id=>$qty){
 
-$q = mysqli_query($koneksi,"SELECT * FROM products WHERE id='$id'");
-$p = mysqli_fetch_assoc($q);
+    // Ambil data produk
+    $q = mysqli_query($koneksi,"SELECT * FROM products WHERE id='$id'");
+    $p = mysqli_fetch_assoc($q);
 
-$sub = $p['price']*$qty;
-$total += $sub;
+    // Hitung subtotal item ini
+    $sub = $p['price']*$qty;
+    $total += $sub;
 ?>
 
 <p><?= $p['name'] ?> (<?= $qty ?>x)</p>
@@ -133,6 +161,7 @@ $total += $sub;
 
 <?php } ?>
 
+<!-- TOTAL BELANJA -->
 <b>Total: Rp <?= number_format($total) ?></b>
 
 <?php endif; ?>
@@ -141,39 +170,50 @@ $total += $sub;
 
 <h3>Alamat Pengiriman</h3>
 
+<!-- ========================================================
+     FORM CHECKOUT TRANSFER
+     Mengisi: nama, telepon, alamat, dan upload bukti transfer
+========================================================= -->
 <form action="proses.php" method="POST" enctype="multipart/form-data">
 
-<input type="hidden" name="mode" value="<?= $mode ?>">
+    <!-- Kirim mode (single/cart) -->
+    <input type="hidden" name="mode" value="<?= $mode ?>">
 
-<?php if($mode=="single"): ?>
-<input type="hidden" name="id_produk" value="<?= $produk['id'] ?>">
-<?php endif; ?>
+    <?php if($mode=="single"): ?>
+    <!-- Jika single, sertakan ID produk -->
+    <input type="hidden" name="id_produk" value="<?= $produk['id'] ?>">
+    <?php endif; ?>
 
-<div class="form-group">
-<label>Nama</label>
-<input type="text" name="nama" required>
-</div>
+    <div class="form-group">
+    <label>Nama</label>
+    <input type="text" name="nama" required>
+    </div>
 
-<div class="form-group">
-<label>Telepon</label>
-<input type="text" name="telp" required>
-</div>
+    <div class="form-group">
+    <label>Telepon</label>
+    <input type="text" name="telp" required>
+    </div>
 
-<div class="form-group">
-<label>Alamat</label>
-<textarea name="alamat" required></textarea>
-</div>
+    <div class="form-group">
+    <label>Alamat</label>
+    <textarea name="alamat" required></textarea>
+    </div>
 
-<div class="form-group">
-<label>Bukti Pembayaran</label>
-<input type="file" name="bukti" required>
-</div>
+    <div class="form-group">
+    <label>Bukti Pembayaran</label>
+    <input type="file" name="bukti" required>
+    </div>
 
-<button type="submit" name="pesan" class="btn">
-Buat Pesanan
-</button>
+    <button type="submit" name="pesan" class="btn">
+    Buat Pesanan
+    </button>
 
 <?php
+// ========================================================
+// TOMBOL KEMBALI
+// Jika ada session 'back_to' → kembali ke halaman asal
+// Jika tidak → kembali ke pemesanan.php
+// ========================================================
 $back = isset($_SESSION['back_to']) 
         ? $_SESSION['back_to'] 
         : 'pemesanan.php';
@@ -182,8 +222,6 @@ $back = isset($_SESSION['back_to'])
 <a href="<?= $back ?>" class="back">
 ← Kembali
 </a>
-
-
 
 </form>
 
