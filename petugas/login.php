@@ -4,7 +4,6 @@ include "config.php";
 
 $error = "";
 
-// Proses Login
 if(isset($_POST['login'])){
 
     $username = mysqli_real_escape_string($koneksi, $_POST['username']);
@@ -23,7 +22,6 @@ if(isset($_POST['login'])){
 
         if(password_verify($password, $u['password'])){
 
-            // SESSION KHUSUS PETUGAS (tidak bentrok dengan admin)
             $_SESSION['petugas_id']       = $u['id'];
             $_SESSION['petugas_username'] = $u['username'];
             $_SESSION['petugas_role']     = $u['role'];
@@ -45,54 +43,78 @@ if(isset($_POST['login'])){
 <!DOCTYPE html>
 <html>
 <head>
-<title>Login Pertugas</title>
+<title>Login Petugas</title>
 
 <style>
+*{
+    box-sizing:border-box;
+    font-family: Arial, sans-serif;
+}
+
 body{
-  font-family: Arial;
-  background:#2196f3;
+    margin:0;
+    background:#1e9be2;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
 
+/* CARD */
 .login-box{
-  width:350px;
-  background:white;
-  padding:30px;
-  margin:100px auto;
-  border-radius:10px;
-  box-shadow:0 0 10px rgba(0,0,0,0.2);
+    width:400px;
+    background:white;
+    padding:35px 30px;
+    border-radius:12px;
+    box-shadow:0 8px 25px rgba(0,0,0,.25);
 }
 
+/* TITLE */
 .login-box h2{
-  text-align:center;
+    text-align:center;
+    margin-bottom:25px;
 }
 
+/* LABEL */
+label{
+    font-size:13px;
+    color:#333;
+}
+
+/* INPUT */
 input{
-  width:100%;
-  padding:10px;
-  margin:10px 0;
-  border:1px solid #ccc;
-  border-radius:5px;
+    width:100%;
+    padding:11px;
+    margin:5px 0 15px;
+    border-radius:8px;
+    border:1px solid #ccc;
 }
 
+/* BUTTON */
 button{
-  width:100%;
-  padding:10px;
-  background:#2196f3;
-  color:white;
-  border:none;
-  border-radius:5px;
-  cursor:pointer;
+    width:100%;
+    padding:12px;
+    background:#1e9be2;
+    border:none;
+    color:white;
+    border-radius:8px;
+    font-size:14px;
+    cursor:pointer;
 }
 
 button:hover{
-  background:#1976d2;
+    background:#1682bf;
 }
 
+/* ERROR */
 .error{
-  color:red;
-  text-align:center;
+    color:red;
+    text-align:center;
+    font-size:14px;
+    margin-bottom:10px;
 }
 </style>
+
 </head>
 
 <body>
@@ -107,11 +129,13 @@ button:hover{
 
 <form method="POST">
 
-<input type="text" name="username" placeholder="Username" required>
+    <label>Username</label>
+    <input type="text" name="username" placeholder="Masukkan Username" required>
 
-<input type="password" name="password" placeholder="Password" required>
+    <label>Password</label>
+    <input type="password" name="password" placeholder="Masukkan Password" required>
 
-<button name="login">Login</button>
+    <button name="login">Login</button>
 
 </form>
 
