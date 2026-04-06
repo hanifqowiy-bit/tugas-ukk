@@ -3,8 +3,14 @@ session_start();
 include "config.php";
 
 /* ====================================================
+   AMBIL DATA USER (UNTUK ALAMAT OTOMATIS)
+==================================================== */
+$user_id = $_SESSION['user_id'];
+$qUser = mysqli_query($koneksi, "SELECT * FROM users WHERE id='$user_id'");
+$user = mysqli_fetch_assoc($qUser);
+
+/* ====================================================
    CEK APAKAH USER SUDAH LOGIN
-   Jika belum login → redirect ke index.php
 ==================================================== */
 if(!isset($_SESSION['user_id'])){
     header("Location:index.php");
@@ -15,18 +21,15 @@ $mode = "";
 
 /* ====================================================
    MODE SINGLE PRODUCT
-   Jika URL mengandung ?id=xx → beli 1 produk langsung
 ==================================================== */
 if(isset($_GET['id'])){
     $mode = "single";
 
     $id = $_GET['id'];
 
-    // Ambil data produk berdasarkan ID
     $q = mysqli_query($koneksi,"SELECT * FROM products WHERE id='$id'");
     $produk = mysqli_fetch_assoc($q);
 
-    // Jika produk tidak ditemukan → kembali ke pemesanan
     if(!$produk){
         header("Location:pemesanan.php");
         exit();
@@ -34,16 +37,14 @@ if(isset($_GET['id'])){
 }
 
 /* ====================================================
-   MODE CART (KERANJANG)
-   Jika session cart tidak kosong → checkout keranjang
+   MODE CART
 ==================================================== */
 elseif(!empty($_SESSION['cart'])){
     $mode = "cart";
 }
 
 /* ====================================================
-   JIKA BUKAN SINGLE DAN BUKAN CART
-   Artinya user belum memilih produk → redirect kembali
+   MODE INVALID
 ==================================================== */
 else{
     header("Location:pemesanan.php");
@@ -128,29 +129,19 @@ body{
 
 <?php if($mode=="single"): ?>
 
-    <!-- ============================
-         MODE SINGLE
-         Menampilkan 1 produk saja
-    ============================= -->
     <p><?= $produk['name'] ?></p>
     <p>Rp <?= number_format($produk['price']) ?></p>
 
 <?php else: ?>
 
 <?php
-// ============================
-// MODE CART
-// Loop semua item di keranjang
-// ============================
 $total=0;
 
 foreach($_SESSION['cart'] as $id=>$qty){
 
-    // Ambil data produk
     $q = mysqli_query($koneksi,"SELECT * FROM products WHERE id='$id'");
     $p = mysqli_fetch_assoc($q);
 
-    // Hitung subtotal item ini
     $sub = $p['price']*$qty;
     $total += $sub;
 ?>
@@ -161,7 +152,6 @@ foreach($_SESSION['cart'] as $id=>$qty){
 
 <?php } ?>
 
-<!-- TOTAL BELANJA -->
 <b>Total: Rp <?= number_format($total) ?></b>
 
 <?php endif; ?>
@@ -170,17 +160,11 @@ foreach($_SESSION['cart'] as $id=>$qty){
 
 <h3>Alamat Pengiriman</h3>
 
-<!-- ========================================================
-     FORM CHECKOUT TRANSFER
-     Mengisi: nama, telepon, alamat, dan upload bukti transfer
-========================================================= -->
 <form action="proses.php" method="POST" enctype="multipart/form-data">
 
-    <!-- Kirim mode (single/cart) -->
     <input type="hidden" name="mode" value="<?= $mode ?>">
 
     <?php if($mode=="single"): ?>
-    <!-- Jika single, sertakan ID produk -->
     <input type="hidden" name="id_produk" value="<?= $produk['id'] ?>">
     <?php endif; ?>
 
@@ -196,7 +180,7 @@ foreach($_SESSION['cart'] as $id=>$qty){
 
     <div class="form-group">
     <label>Alamat</label>
-    <textarea name="alamat" required></textarea>
+    <textarea name="alamat" required><?= $user['alamat'] ?? '' ?></textarea>
     </div>
 
     <div class="form-group">
@@ -209,11 +193,6 @@ foreach($_SESSION['cart'] as $id=>$qty){
     </button>
 
 <?php
-// ========================================================
-// TOMBOL KEMBALI
-// Jika ada session 'back_to' → kembali ke halaman asal
-// Jika tidak → kembali ke pemesanan.php
-// ========================================================
 $back = isset($_SESSION['back_to']) 
         ? $_SESSION['back_to'] 
         : 'pemesanan.php';
