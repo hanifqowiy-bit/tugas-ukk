@@ -22,6 +22,9 @@ $transaksi = mysqli_num_rows(mysqli_query($koneksi,"SELECT * FROM transaksi"));
 <head>
 <title>Dashboard Admin</title>
 
+<!-- LUCIDE ICON -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
 <style>
 
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
@@ -84,7 +87,13 @@ body{background:#f2f4f7}
  border-radius:10px;
  text-align:center;
  box-shadow:0 2px 5px rgba(0,0,0,0.2);
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ gap:8px;
 }
+
+.card svg{width:32px;height:32px;color:#2196f3;}
 
 .card h3{
  margin:0;
@@ -141,7 +150,6 @@ body{background:#f2f4f7}
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-
 <h2>KOWI-MART</h2>
 
 <a href="dashboard.php" class="active">Dashboard</a>
@@ -154,7 +162,6 @@ body{background:#f2f4f7}
 <br><br>
 
 <a href="../logout.php">Keluar</a>
-
 </div>
 
 <!-- MAIN -->
@@ -172,23 +179,77 @@ body{background:#f2f4f7}
 
     <div class="card">
         <h3>Total User</h3>
-        <p><?= $user ?></p>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <i data-lucide="users"></i>
+            <p><?= $user ?></p>
+        </div>
     </div>
 
     <div class="card">
         <h3>Total Produk</h3>
-        <p><?= $produk ?></p>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <i data-lucide="package"></i>
+            <p><?= $produk ?></p>
+        </div>
     </div>
 
     <div class="card">
         <h3>Total Transaksi</h3>
-        <p><?= $transaksi ?></p>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <i data-lucide="shopping-cart"></i>
+            <p><?= $transaksi ?></p>
+        </div>
     </div>
 
 </div>
 
+<!-- =============================== -->
+<!-- GRAFIK BAR DI BAWAH 3 CARD -->
+<!-- =============================== -->
+<div style="
+    margin-top:30px;
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    max-width:600px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.2);
+">
+    <h3 style="margin-bottom:15px; color:#333;">Statistik Data</h3>
+
+    <canvas id="barChart" style="width:100%; max-height:220px;"></canvas>
+
 </div>
-</div>
+
+</div> <!-- END MAIN -->
+</div> <!-- END WRAPPER -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+lucide.createIcons();
+
+const ctx = document.getElementById('barChart');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['User', 'Produk', 'Transaksi'],
+        datasets: [{
+            label: 'Jumlah Data',
+            data: [<?= $user ?>, <?= $produk ?>, <?= $transaksi ?>],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
 
 </body>
 </html>
