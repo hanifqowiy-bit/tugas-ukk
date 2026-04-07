@@ -1,46 +1,33 @@
 <?php
-// ===============================
-// MEMULAI SESSION
-// ===============================
 session_start();
-
-// Menghubungkan ke database
 include "config.php";
 
-/* 
-   MENYIMPAN HALAMAN ASAL
-   Digunakan untuk kembali ke halaman pemesanan
-*/
 $_SESSION['back_to'] = 'pemesanan.php';
 
-// Mengecek apakah user sudah login
 if(!isset($_SESSION['user_id'])){
     header("Location:index.php");
     exit();
 }
 
-// ===============================
-// LOGIKA SEARCH
-// ===============================
-
+/* LOGIKA SEARCH — size dihapus */
 if (isset($_GET['cari']) && $_GET['cari'] != "") {
     $cari = mysqli_real_escape_string($koneksi, $_GET['cari']);
-    $produk = mysqli_query($koneksi, "SELECT * FROM products WHERE name LIKE '%$cari%' ");
+    $produk = mysqli_query($koneksi,
+        "SELECT * FROM products 
+         WHERE name LIKE '%$cari%'"
+    );
 } else {
     $produk = mysqli_query($koneksi,"SELECT * FROM products");
 }
-
 ?>
 <!DOCTYPE html>
 <html>
 <head>
 <title>Pemesanan</title>
 
-<!-- CDN Lucide -->
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <style>
-
 *{
     margin:0;
     padding:0;
@@ -52,7 +39,6 @@ body{
     background:#f2f6f9;
 }
 
-/* container */
 .container{
     display:flex;
     min-height:100vh;
@@ -131,9 +117,7 @@ body{
     margin-bottom:15px;
 }
 
-/* ===============================
-   SEARCH AREA
-================================ */
+/* SEARCH */
 .search-area{
     display:flex;
     align-items:center;
@@ -169,47 +153,54 @@ body{
     font-size:14px;
 }
 
-/* PRODUK GRID */
+/* =========================================
+   PRODUK — DISESUAIKAN DENGAN DASHBOARD.PHP
+========================================= */
 .produk-list{
     display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-    gap:20px;
+    grid-template-columns:repeat(auto-fill, minmax(200px,1fr));
+    gap:25px;
 }
 
 .card{
     background:white;
     border-radius:12px;
-    box-shadow:0 3px 8px rgba(0,0,0,0.15);
-    overflow:hidden;
-    transition:.2s;
+    padding:12px;
+    text-align:center;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    transition:all 0.3s ease;
+    cursor:pointer;
 }
 
 .card:hover{
-    transform:translateY(-5px);
+    transform:translateY(-6px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
 }
 
 .card img{
     width:100%;
-    height:180px;
+    height:200px;
     object-fit:cover;
+    border-radius:10px;
 }
 
 .card-body{
-    padding:12px;
-    text-align:center;
+    padding:0;
 }
 
 .card-body h3{
-    font-size:16px;
-    margin-bottom:5px;
+    font-size:15px;
+    margin:10px 0 5px;
 }
 
 .price{
-    color:#1e9bd7;
+    color:#169bd5;
     font-weight:bold;
+    font-size:15px;
     margin-bottom:10px;
 }
 
+/* tombol */
 .btn-group{
     display:flex;
     justify-content:space-between;
@@ -295,7 +286,6 @@ body{
     border-left:5px solid #169bd5;
     padding-left:10px;
 }
-
 </style>
 
 <script>
@@ -311,14 +301,12 @@ function closePopup(){
 }
 
 function pilihMetode(metode){
-
     if(metode === "Transfer"){
         window.location.href = "configure_transfer.php?id=" + idProduk;
     }
     else if(metode === "COD"){
         window.location.href = "configure_cod.php?id=" + idProduk;
     }
-
 }
 </script>
 
@@ -327,7 +315,6 @@ function pilihMetode(metode){
 
 <div class="container">
 
-<!-- SIDEBAR -->
 <div class="sidebar">
 
     <h2>KOWI-MART</h2>
@@ -349,7 +336,6 @@ function pilihMetode(metode){
 <div class="content">
 
 <div class="header">
-
     <div>
         <h1>Selamat</h1>
         <p>Berbelanja</p>
@@ -364,13 +350,10 @@ function pilihMetode(metode){
             <i data-lucide="history"></i> Riwayat
         </a>
     </div>
-
 </div>
 
-<!-- =============== SEARCH AREA =============== -->
 <div class="search-area">
 
-    <!-- Tombol back hanya muncul saat ada pencarian -->
     <?php if(isset($_GET['cari']) && $_GET['cari'] != ""){ ?>
         <a href="pemesanan.php" class="back-btn">
             <i data-lucide="arrow-left"></i> Kembali
@@ -387,9 +370,7 @@ function pilihMetode(metode){
 
 </div>
 
-<div class="judul-produk">
-    Produk
-</div>
+<div class="judul-produk">Produk</div>
 
 <div class="produk-list">
 
@@ -434,33 +415,18 @@ function pilihMetode(metode){
 
 </div>
 
-<!-- POPUP PEMBAYARAN -->
+<!-- POPUP -->
 <div class="popup" id="popup">
-
     <div class="popup-box">
-
         <h3>Pilih Metode Pembayaran</h3>
 
         <div class="popup-btn">
-
-            <button class="btn-transfer"
-            onclick="pilihMetode('Transfer')">
-                Transfer
-            </button>
-
-            <button class="btn-cod"
-            onclick="pilihMetode('COD')">
-                COD
-            </button>
-
+            <button class="btn-transfer" onclick="pilihMetode('Transfer')">Transfer</button>
+            <button class="btn-cod" onclick="pilihMetode('COD')">COD</button>
         </div>
 
-        <button class="btn-close" onclick="closePopup()">
-            Batal
-        </button>
-
+        <button class="btn-close" onclick="closePopup()">Batal</button>
     </div>
-
 </div>
 
 <script>
