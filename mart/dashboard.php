@@ -120,12 +120,13 @@ body{
     border:none;
     border-radius:8px;
     cursor:pointer;
-    display:none; /* Default HIDDEN */
+    display:none;
     align-items:center;
     gap:5px;
     font-size:14px;
     text-decoration:none;
 }
+
 .back-btn:hover{
     background:#0f80b4;
 }
@@ -167,6 +168,7 @@ body{
     text-align:center;
     box-shadow:0 4px 12px rgba(0,0,0,0.08);
     transition:all 0.3s ease;
+    cursor:pointer;
 }
 
 .card:hover{
@@ -190,6 +192,47 @@ body{
     color:#169bd5;
     font-weight:bold;
     font-size:15px;
+}
+
+/* MODAL */
+#deskripsiModal{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+}
+
+#deskripsiModal .modal-content{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    max-width:500px;
+    width:90%;
+    position:relative;
+}
+
+#deskripsiModal .close{
+    position:absolute;
+    top:10px;
+    right:15px;
+    cursor:pointer;
+    font-size:20px;
+}
+
+#modalNama{
+    margin-bottom:10px;
+}
+
+#modalHarga{
+    margin-top:15px;
+    font-weight:bold;
+    color:#169bd5;
 }
 </style>
 </head>
@@ -229,13 +272,11 @@ body{
 
     <!-- SEARCH + BACK BUTTON -->
     <div class="search-area">
-        
-        <!-- BACK (muncul saat ada pencarian) -->
+
         <a id="backBtn" href="dashboard.php" class="back-btn">
             <i data-lucide="arrow-left"></i> Kembali
         </a>
 
-        <!-- SEARCH BAR -->
         <form method="GET" class="search-box">
             <input 
                 type="text" 
@@ -251,31 +292,69 @@ body{
     </div>
 
     <div class="produk">
+    <?php while($p = mysqli_fetch_assoc($produk)): ?>
+    <div class="card" 
+         data-nama="<?= htmlspecialchars($p['name']); ?>" 
+         data-harga="Rp <?= number_format($p['price']); ?>" 
+         data-deskripsi="<?= htmlspecialchars($p['description']); ?>">
 
-        <?php while($p = mysqli_fetch_assoc($produk)): ?>
-        <div class="card">
-            <img src="../assets/<?php echo $p['photo']; ?>">
-            <h3><?php echo $p['name']; ?></h3>
-            <p>Rp <?php echo number_format($p['price']); ?></p>
-        </div>
-        <?php endwhile; ?>
+        <img src="../assets/<?php echo $p['photo']; ?>" alt="<?php echo $p['name']; ?>">
 
+        <h3><?php echo $p['name']; ?></h3>
+        <p>Rp <?php echo number_format($p['price']); ?></p>
     </div>
+    <?php endwhile; ?>
+</div>
 
+<!-- MODAL -->
+<div id="deskripsiModal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3 id="modalNama"></h3>
+        <p id="modalDeskripsi"></p>
+        <p id="modalHarga"></p>
+    </div>
 </div>
 
 <script>
-    lucide.createIcons();
+lucide.createIcons();
 
-    // Show/hide tombol back otomatis
-    const backBtn = document.getElementById("backBtn");
-    const searchInput = document.getElementById("searchInput");
+// Tombol kembali otomatis muncul jika search diisi
+const backBtn = document.getElementById("backBtn");
+const searchInput = document.getElementById("searchInput");
 
-    if (searchInput.value.trim() !== "") {
-        backBtn.style.display = "flex";
-    } else {
-        backBtn.style.display = "none";
+if (searchInput.value.trim() !== "") {
+    backBtn.style.display = "flex";
+} else {
+    backBtn.style.display = "none";
+}
+
+// Modal produk
+const cards = document.querySelectorAll('.card');
+const modal = document.getElementById('deskripsiModal');
+const closeModal = document.querySelector('.close');
+const modalNama = document.getElementById('modalNama');
+const modalDeskripsi = document.getElementById('modalDeskripsi');
+const modalHarga = document.getElementById('modalHarga');
+
+cards.forEach(card => {
+    card.addEventListener('click', () => {
+        modalNama.textContent = card.getAttribute('data-nama');
+        modalDeskripsi.textContent = card.getAttribute('data-deskripsi');
+        modalHarga.textContent = card.getAttribute('data-harga');
+        modal.style.display = "flex";
+    });
+});
+
+closeModal.addEventListener('click', () => {
+    modal.style.display = "none";
+});
+
+window.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        modal.style.display = "none";
     }
+});
 </script>
 
 </body>
