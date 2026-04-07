@@ -1,50 +1,43 @@
 <?php
 session_start(); 
-// Memulai session agar hanya user login yang dapat mengakses halaman
-
 include "../config.php";
-// Menghubungkan ke database
 
-// CEK ROLE USER (hanya admin yang boleh masuk)
+// CEK ROLE USER
 if($_SESSION['role']!='admin'){
- header("Location: ../login.php"); // jika bukan admin --> redirect
+ header("Location: ../login.php");
  exit;
 }
 
 /* ================= TAMBAH ================= */
-if(isset($_POST['tambah'])){ // jika tombol tambah ditekan
+if(isset($_POST['tambah'])){
 
- $nama  = $_POST['nama'];   // nama produk baru
- $harga = $_POST['harga'];  // harga produk
- $stok  = $_POST['stok'];   // stok awal
+ $nama       = $_POST['nama'];
+ $harga      = $_POST['harga'];
+ $stok       = $_POST['stok'];
+ $deskripsi  = $_POST['deskripsi'];
 
- $foto = $_FILES['foto']['name'];      // nama file foto
- $tmp  = $_FILES['foto']['tmp_name'];  // lokasi file sementara
+ $foto = $_FILES['foto']['name'];
+ $tmp  = $_FILES['foto']['tmp_name'];
 
- // upload file ke folder assets
  move_uploaded_file($tmp,"../../assets/".$foto);
 
- // insert produk baru ke database
  mysqli_query($koneksi,"
-  INSERT INTO products(name,price,stock,photo)
-  VALUES('$nama','$harga','$stok','$foto')
+  INSERT INTO products(name,price,stock,photo,description)
+  VALUES('$nama','$harga','$stok','$foto','$deskripsi')
  ");
 }
 
-
 /* ================= UPDATE ================= */
-if(isset($_POST['update'])){ // jika tombol update ditekan
+if(isset($_POST['update'])){
 
- $id      = $_POST['id'];       // id produk
- $nama    = $_POST['nama'];     // nama baru
- $harga   = $_POST['harga'];    // harga baru
- $sisa    = $_POST['stok'];     // sisa stok di tampilan
- $terjual = $_POST['terjual'];  // jumlah terjual
+ $id      = $_POST['id'];
+ $nama    = $_POST['nama'];
+ $harga   = $_POST['harga'];
+ $sisa    = $_POST['stok'];
+ $terjual = $_POST['terjual'];
 
- // menghitung stok asli (sisa stok + jumlah terjual)
  $stok_baru = $sisa + $terjual;
 
- // jika user mengganti foto
  if($_FILES['foto']['name']!=""){
 
   $foto = $_FILES['foto']['name'];
@@ -52,7 +45,6 @@ if(isset($_POST['update'])){ // jika tombol update ditekan
 
   move_uploaded_file($tmp,"../../assets/".$foto);
 
-  // update dengan foto baru
   mysqli_query($koneksi,"
    UPDATE products SET
    name='$nama',
@@ -64,7 +56,6 @@ if(isset($_POST['update'])){ // jika tombol update ditekan
 
  }else{
 
-  // update tanpa mengubah foto
   mysqli_query($koneksi,"
    UPDATE products SET
    name='$nama',
@@ -75,19 +66,16 @@ if(isset($_POST['update'])){ // jika tombol update ditekan
  }
 }
 
-
 /* ================= HAPUS ================= */
-if(isset($_GET['hapus'])){ // jika tombol hapus ditekan
+if(isset($_GET['hapus'])){
 
- // hapus data produk berdasarkan id
  mysqli_query($koneksi,"
   DELETE FROM products WHERE id='$_GET[hapus]'
  ");
 
- header("Location: manajemen_produk.php"); // kembali ke halaman utama
+ header("Location: manajemen_produk.php");
  exit;
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -96,14 +84,10 @@ if(isset($_GET['hapus'])){ // jika tombol hapus ditekan
 <title>Manajemen Produk</title>
 
 <style>
-
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-
 body{background:#f2f4f7}
-
 .wrapper{display:flex;height:100vh}
 
-/* SIDEBAR */
 .sidebar{
  width:230px;
  background:#2196f3;
@@ -126,10 +110,8 @@ body{background:#f2f4f7}
  background:rgba(255,255,255,.2);
 }
 
-/* MAIN */
 .main{flex:1;padding:20px;background:white}
 
-/* HEADER */
 .header{
  background:#2196f3;
  color:white;
@@ -138,7 +120,6 @@ body{background:#f2f4f7}
  margin-bottom:15px;
 }
 
-/* BUTTON */
 .btn{
  padding:6px 12px;
  border:none;
@@ -150,7 +131,6 @@ body{background:#f2f4f7}
 .btn-edit{background:#0992C2;color:white}
 .btn-del{background:#f44336;color:white}
 
-/* TABLE */
 table{width:100%;border-collapse:collapse}
 
 th,td{
@@ -168,7 +148,6 @@ img{
  border-radius:5px;
 }
 
-/* MODAL */
 .modal{
  display:none;
  position:fixed;
@@ -188,7 +167,8 @@ img{
 
 .modal-box h3{text-align:center;margin-bottom:10px}
 
-.modal-box input{
+.modal-box input,
+.modal-box textarea{
  width:100%;
  padding:8px;
  margin:5px 0;
@@ -196,12 +176,16 @@ img{
  border-radius:5px;
 }
 
+.modal-box textarea{
+ resize:none;
+ height:80px;
+}
+
 .close{
  float:right;
  cursor:pointer;
  color:red;
 }
-
 </style>
 </head>
 
@@ -209,12 +193,9 @@ img{
 
 <div class="wrapper">
 
-<!-- SIDEBAR -->
 <div class="sidebar">
-
 <h2>KOWI-MART</h2>
 
-<!-- MENU -->
 <a href="dashboard.php">Dashboard</a>
 <a href="manajemen_user.php">Manajemen User</a>
 <a href="laporan.php">Laporan</a>
@@ -225,17 +206,14 @@ img{
 <br><br>
 
 <a href="../logout.php">Keluar</a>
-
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
 <div class="header">
 <h3>Manajemen Produk</h3>
 </div>
 
-<!-- tombol buka modal tambah produk -->
 <button class="btn btn-add" onclick="openTambah()">
 + Tambah Produk
 </button>
@@ -243,7 +221,6 @@ img{
 <br><br>
 
 <table>
-
 <tr>
  <th>No</th>
  <th>Nama</th>
@@ -254,10 +231,8 @@ img{
 </tr>
 
 <?php
+$no=1;
 
-$no=1; // nomor urut tabel
-
-// Query mengambil produk + stok + terjual + sisa stok
 $q = mysqli_query($koneksi,"
 SELECT 
  p.id,
@@ -283,13 +258,10 @@ while($p=mysqli_fetch_assoc($q)){
  <td><?= $p['sisa_stok'] ?></td>
 
  <td>
-    <!-- Menampilkan foto produk -->
-    <img src="../../assets/<?= $p['photo'] ?>">
+  <img src="../../assets/<?= $p['photo'] ?>">
  </td>
 
  <td>
-
- <!-- tombol edit (memanggil modal edit + isi data ke form) -->
  <button class="btn btn-edit"
  onclick="openEdit(
  '<?= $p['id'] ?>',
@@ -301,27 +273,22 @@ while($p=mysqli_fetch_assoc($q)){
  Edit
  </button>
 
- <!-- tombol hapus -->
  <a href="?hapus=<?= $p['id'] ?>"
  onclick="return confirm('Hapus produk?')"
  class="btn btn-del">
  Hapus
  </a>
-
  </td>
 </tr>
 
 <?php } ?>
-
 </table>
 
 </div>
 </div>
 
-
 <!-- MODAL TAMBAH PRODUK -->
 <div class="modal" id="modalTambah">
-
 <div class="modal-box">
 
 <span class="close" onclick="closeModal()">&times;</span>
@@ -334,7 +301,11 @@ while($p=mysqli_fetch_assoc($q)){
 <input name="harga" type="number" placeholder="Harga" required>
 <input name="stok" type="number" placeholder="Stok Awal" required>
 
+<textarea name="deskripsi" placeholder="Deskripsi Produk" required></textarea>
+
 <input type="file" name="foto" required>
+
+<br><br>
 
 <button name="tambah" class="btn btn-add">Simpan</button>
 
@@ -343,10 +314,8 @@ while($p=mysqli_fetch_assoc($q)){
 </div>
 </div>
 
-
 <!-- MODAL EDIT PRODUK -->
 <div class="modal" id="modalEdit">
-
 <div class="modal-box">
 
 <span class="close" onclick="closeModal()">&times;</span>
@@ -355,7 +324,6 @@ while($p=mysqli_fetch_assoc($q)){
 
 <form method="POST" enctype="multipart/form-data">
 
-<!-- hidden data -->
 <input type="hidden" name="id" id="eid">
 <input type="hidden" name="terjual" id="eterjual">
 
@@ -376,17 +344,12 @@ while($p=mysqli_fetch_assoc($q)){
 </div>
 </div>
 
-
 <script>
-
-// buka modal tambah produk
 function openTambah(){
  document.getElementById('modalTambah').style.display='flex';
 }
 
-// buka modal edit + mengisi form
 function openEdit(id,nama,harga,stok,terjual){
-
  document.getElementById('eid').value=id;
  document.getElementById('enama').value=nama;
  document.getElementById('eharga').value=harga;
@@ -396,12 +359,10 @@ function openEdit(id,nama,harga,stok,terjual){
  document.getElementById('modalEdit').style.display='flex';
 }
 
-// menutup kedua modal
 function closeModal(){
  document.getElementById('modalTambah').style.display='none';
  document.getElementById('modalEdit').style.display='none';
 }
-
 </script>
 
 </body>
